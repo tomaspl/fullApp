@@ -65,7 +65,6 @@ userSchema.methods.generateAuthToken = async function () {
     }
   );
   var decoded = jwtDecode(token); //decoded._id = id usuario
-  console.log('decoded', decoded)
   user.tokens = user.tokens.concat({ token });
   await user.save();
   return token;

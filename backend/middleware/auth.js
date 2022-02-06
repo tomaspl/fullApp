@@ -9,7 +9,6 @@ const auth = async (req, res, next) => {
       _id: decoded._id,
       "tokens.token": token,
     });
-
     if (!user) {
       throw new Error();
     }
@@ -25,9 +24,7 @@ const auth = async (req, res, next) => {
 const authAdmin = async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
-    console.log('token', token)
     const decoded = jwt.verify(token, "thisisasecretformyapp");
-    console.log('_id',decoded._id)
     const user = await User.findOne({
       _id: decoded._id,
       "tokens.token": token,
