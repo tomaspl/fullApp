@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,
@@ -57,7 +61,7 @@ userSchema.methods.generateAuthToken = async function () {
     { _id: user._id.toString() },
     "thisisasecretformyapp",
     {
-      expiresIn: 3000, // seconds
+      expiresIn: 3000,
     }
   );
   var decoded = jwtDecode(token); //decoded._id = id usuario

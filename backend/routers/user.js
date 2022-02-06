@@ -1,8 +1,9 @@
 const express = require("express");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const { authAdmin, auth } = require("../middleware/auth");
 const router = new express.Router();
-//DONE
+
 router.post("/user", async (req, res) => {
   const user = new User(req.body);
   try {
@@ -13,7 +14,7 @@ router.post("/user", async (req, res) => {
   }
 });
 
-router.get("/users", async (req, res) => {
+router.get("/users", auth, async (req, res) => {
   try {
     const users = await User.find();
     res.status(200).send({ users });
@@ -22,7 +23,7 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", authAdmin, async (req, res) => {
   try {
     const user = await User.findOneAndDelete({ _id: req.params.id });
     if (!user) {
