@@ -19,10 +19,14 @@ const typeDefs = gql`
   }
 `;
 
+let token;
+
 const resolvers = {
   Query: {
     allUsers: async () => {
-      const response = await axios.get("http://localhost:8000/users");
+      const response = await axios.get("http://localhost:8000/users", {headers: {
+        'Authorization': token
+      }});
       return response.data.users;
     },
   },
@@ -41,7 +45,10 @@ const resolvers = {
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ typeDefs, resolvers,context: ({ req }) => {
+  // get the user token from the headers
+  token = req.headers.authorization || '';
+ } });
 
 // The `listen` method launches a web server.
 server.listen().then(({ url }) => {
