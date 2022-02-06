@@ -57,7 +57,7 @@ userSchema.methods.generateAuthToken = async function () {
     { _id: user._id.toString() },
     "thisisasecretformyapp",
     {
-      expiresIn: 3000,
+      expiresIn: 3000, // seconds
     }
   );
   var decoded = jwtDecode(token); //decoded._id = id usuario
