@@ -1,5 +1,6 @@
 const express = require("express");
 const Book = require("../models/book");
+const User = require("../models/user");
 const { authAdmin, auth } = require("../middleware/auth");
 const router = new express.Router();
 
@@ -18,7 +19,11 @@ router.post("/book/rate", auth, async (req, res) => {
   if(!book){
     return res.status(404).send();
   }
-  if(book.voters.some(v => v === req.user._id.toString())){
+  if(book.voters.some(v => v.toString() === req.user._id.toString())){
+    return res.status(403).send();
+  }
+
+  if(book.renters.find(r => r.toString() === req.user._id.toString())){
     return res.status(403).send();
   }
   book.voters.push(req.user._id);
@@ -27,7 +32,55 @@ router.post("/book/rate", auth, async (req, res) => {
   book.amountOfStars = book.amountOfStars + req.body.stars;
   try {
     await book.save();
-    res.status(200).send({ book });
+    res.status(200).send(book);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+router.post("/book/rent", auth, async (req, res) => {
+  const book = await Book.findOne({ _id: req.body.id });
+  const user = await User.findOne({ _id: req.user._id });
+  if(!book){
+    return res.status(404).send();
+  }
+  if(book.renters.some(v => v.toString() === req.user._id.toString())){
+    return res.status(403).send();
+  }
+  book.renters.push(req.user._id);
+  book.rented = true;
+  user.booksRented.push(book._id);
+  user.isRenting = true;
+
+  try {
+    await book.save();
+    await user.save();
+    res.status(200).send(book);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+router.post("/book/return", auth, async (req, res) => {
+  const book = await Book.findOne({ _id: req.body.id });
+  const user = await User.findOne({ _id: req.user._id });
+  if(!book){
+    return res.status(404).send();
+  }
+
+  if(book.renters.length > 0 && book.renters[book.renters.length - 1].toString()!== req.user._id.toString()){
+    return res.status(403).send();
+  }
+  if(user.booksRented.length >0 && user.booksRented[user.booksRented.length - 1].toString()!== book._id.toString()){
+    return res.status(403).send();
+  }
+  book.rented = false;
+  user.isRenting = false;
+
+  try {
+    await book.save();
+    await user.save();
+    res.status(200).send(book);
   } catch (e) {
     res.status(400).send(e);
   }

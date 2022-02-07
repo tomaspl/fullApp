@@ -24,13 +24,14 @@ const bookSchema = new mongoose.Schema(
       default: 0,
     },
     voters: [{
-      type: String
-    }],
-    currentRenter: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    }],
+    rented: {
+      type: Boolean,
+      default: false
     },
-    previuosRenters: [
+    renters: [
       {
           type: mongoose.Schema.Types.ObjectId,
           default: [],

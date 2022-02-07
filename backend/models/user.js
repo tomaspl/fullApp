@@ -36,6 +36,17 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    isRenting: {
+      type: Boolean,
+      default: false
+    },
+    booksRented: [
+      {
+          type: mongoose.Schema.Types.ObjectId,
+          default: [],
+          ref: 'Book'
+      }
+    ],
     isAdmin: {
       type: Boolean,
       default: false,
@@ -59,10 +70,10 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
     { _id: user._id.toString() },
-    "thisisasecretformyapp",
-    {
+    "thisisasecretformyapp"
+    /*{
       expiresIn: 3000,
-    }
+    }*/
   );
   var decoded = jwtDecode(token); //decoded._id = id usuario
   user.tokens = user.tokens.concat({ token });

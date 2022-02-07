@@ -6,7 +6,7 @@ const {auth} = require('../middleware/auth')
 const router = new express.Router()
 
 router.post('/comments/book/create', auth, async (req, res) => {
-    const book = await Book.findById(req.body.book)
+    const book = await Book.findById(req.body.bookId)
     if(!book) return res.status(400).send({error:'Book not founded'})
     const commentBook = new CommentBook({...req.body, user:req.user._id})
     try {
