@@ -1,11 +1,10 @@
-import { TokenContext } from 'contexts/TokenContext';
-import { Navigate } from 'react-router-dom';
+import TokenContext from 'contexts/TokenContext'
+import { Navigate, Outlet } from 'react-router-dom';
 const { useContext } = require("react");
 
-export default function RequireAuth({ children }) {
+export default function RequireAuth(props) {
   let [token] = useContext(TokenContext);
-  if(!token) {
-    return <Navigate to="/"/>;
-  }
-  return children;
+  if(!token) return <Navigate to="/"/>;
+
+  return <Outlet/>;
 }

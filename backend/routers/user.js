@@ -39,10 +39,10 @@ router.delete("/users/:id", authAdmin, async (req, res) => {
 router.post("/user/login", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(404).send();
+    if (!user) return res.status(404).send({error: 'Bad user or password'});
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
-    if (!isMatch) return res.status(404).send();
+    if (!isMatch) return res.status(404).send({error: 'Bad user or password'});
     const token = await user.generateAuthToken();
     res.send({ user, token});
   } catch (e) {

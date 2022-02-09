@@ -1,6 +1,5 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, UserInputError } = require("apollo-server");
 const axios = require("axios");
-
 const typeDefs = gql`
 
   type Token {
@@ -14,6 +13,7 @@ const typeDefs = gql`
     password: String
     booksRented: [Book]
     tokens: [Token]
+    token: String
     _id: ID!
   }
 
@@ -47,6 +47,7 @@ const typeDefs = gql`
     rateBook(id: ID!, stars: Int): Book
     rentBook(id: ID!): Book
     returnBook(id: ID!): Book
+    login(email: String, password: String): User
   }
 `;
 
@@ -54,28 +55,28 @@ let token = '';
 
 const resolvers = {
   Query: {
-    allUsers: async () => {
+    allUsers: async (root, args, context) => {
       const response = await axios.get("http://localhost:8000/users", {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return response.data.users;
     },
-    allBooks: async () => {
+    allBooks: async (root, args, context) => {
       const response = await axios.get("http://localhost:8000/books", {headers: {
-        'Authorization': token,
+        'Authorization': context.token,
       }});
       return response.data.books;
     },
-    getBookById: async (root, args) => {
+    getBookById: async (root, args, context) => {
       const {id} = args
       const response = await axios.get("http://localhost:8000/book", {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }, data: {id}});
       return response.data.book;
     },
-    getCommentsByBookId: async (root, args) => {
+    getCommentsByBookId: async (root, args, context) => {
       const response = await axios.get(`http://localhost:8000/comments/book/${args.bookId}`, {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return response.data;
     }
@@ -83,6 +84,9 @@ const resolvers = {
   Book: {
     currentRenter: (root) => root.renters[root.renters-1],
     average: (root) => root.amountOfStars / root.amountOfVoters
+  },
+  User: {
+    token: (root) => root.tokens[root.tokens.length - 1].token
   },
   Mutation: {
     addUser: async (root, args) => {
@@ -94,39 +98,47 @@ const resolvers = {
       const user = await axios.delete(`http://localhost:8000/users/${args.id}`);
       return user.data;
     },
-    commentBook: async (root, args) => {
+    commentBook: async (root, args, context) => {
       const comment = await axios.post("http://localhost:8000/comments/book/create", { ...args }, {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return comment.data
     },
-    rateBook: async (root, args) => {
+    rateBook: async (root, args, context) => {
       const book = await axios.post("http://localhost:8000/book/rate", { ...args }, {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return book.data
     },
-    rentBook: async (root, args) => {
+    rentBook: async (root, args, context) => {
       const book = await axios.post("http://localhost:8000/book/rent", { ...args }, {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return book.data
     },
-    returnBook: async (root, args) => {
+    returnBook: async (root, args, context) => {
       const book = await axios.post("http://localhost:8000/book/return", { ...args }, {headers: {
-        'Authorization': token
+        'Authorization': context.token
       }});
       return book.data
-    }
-
+    },
+    login: async (root, args) => {
+      try {
+        const response = await axios.post("http://localhost:8000/user/login", { ...args });
+        return response.data.user
+      } catch (e) {
+        throw new UserInputError('Error on credentials')
+      }
+    },
   },
 };
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers,context: ({ req }) => {
+const server = new ApolloServer({ typeDefs, resolvers, context: ({ req }) => {
   // get the user token from the headers
   token = req.headers.authorization || '';
+  return {token}
  } });
 
 // The `listen` method launches a web server.

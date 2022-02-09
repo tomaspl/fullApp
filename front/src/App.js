@@ -14,14 +14,9 @@ function App() {
           <Routes>
             <Route exact path="/" element={<Login/>} />
             <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/home"
-              element={
-                <RequireAuth>
-                  <Books />
-                </RequireAuth>
-              }
-            />
+            <Route element={<RequireAuth />}>
+              <Route path="/home" element={<Books />} />
+            </Route>
           </Routes>
         </div>
       </TokenContextProvider>
