@@ -9,4 +9,14 @@ const USERS = gql`
   }
 `;
 
-export { USERS };
+const BOOKS = gql`
+  {
+    allBooks {
+      title,
+      description,
+      _id
+    }
+  }
+`;
+
+export { USERS, BOOKS };
