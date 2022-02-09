@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client";
-import { USERS } from "./graphql/queries";
-import { NEW_USER } from "./graphql/mutations";
+import { NEW_USER } from "graphql/mutations";
 
 function Signup() {
   const [formValues, setFormValues] = useState({ name: "", email: "" });

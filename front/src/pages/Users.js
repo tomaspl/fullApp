@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { DELETE_USER } from "./graphql/mutations";
-import { USERS } from "./graphql/queries";
+import { DELETE_USER } from "graphql/mutations";
+import { USERS } from "graphql/queries";
 
 function Users() {
   const { loading, error, data } = useQuery(USERS);
